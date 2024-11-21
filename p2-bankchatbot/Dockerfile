@@ -17,7 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the application code into the container
 COPY . .
 
-# Download the DialoGPT-small model during the build to reduce startup time
+# Download the DialoGPT-small model during the build
 RUN python -c "from transformers import AutoModelForCausalLM, AutoTokenizer; \
     AutoTokenizer.from_pretrained('microsoft/DialoGPT-small'); \
     AutoModelForCausalLM.from_pretrained('microsoft/DialoGPT-small')"
@@ -25,5 +25,5 @@ RUN python -c "from transformers import AutoModelForCausalLM, AutoTokenizer; \
 # Expose the port (Cloud Run uses the PORT environment variable)
 EXPOSE 8080
 
-# Command to run the Flask app
-CMD ["python", "server.py"]
+# Command to run the Flask app using Gunicorn
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 server:app
